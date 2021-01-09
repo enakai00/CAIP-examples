@@ -116,6 +116,75 @@ The output contains the predicion and key values as below:
 
 The [Notebook](batch_prediction_with_Keras.ipynb) explains the whole procedure to use this method for the batch prediction. Follow [Use JupyterLab Notebooks](README.md#use-jupyterlab-notebooks) to run the notebook.
 
+### Using the `@tf.function` decorator
+
+Suppose that you defined and trained a Keras model. The model object is stored in the variable `model`. You can define a wrapper function as below:
+
+```
+@tf.function(input_signature=[tf.TensorSpec([None, 7]), 
+                              tf.TensorSpec([None], dtype=tf.int32)])
+def add_key(features, key):
+  pred = model(features, training=False)
+  return {'prediction': pred, 'key': key}
+```
+
+The `input_signature` option specifies the parameter types of the function `add_key`. In this case, the parameter `features` corresponds to a list of seven float values that is an input feature of the original model, and the parameter `key` corresponds to an interger key. In other words, the function `add_key` accepts features of the original model and an interger key. It returns the dictonary containing prediction and key values.
+
+>Note: `@tf.function` decorator builds a tensorfolow graph containing the decorated function.
+
+You export the model in the saved_model format using the wrapper function as 'serving_default' as below:
+
+```
+export_path = './export'
+model.save(export_path, signatures={'serving_default': add_key}, save_format='tf')
+```
+
+This ensure that the function `add_key` is used to make predictions once you deploy it to the AI Platform. The following code snippet shows how you use the deployed model to make an online prediction. The model accepts the `key` field in addition to `features`.
+
+```
+from googleapiclient import discovery
+from oauth2client.client import GoogleCredentials
+import json
+
+credentials = GoogleCredentials.get_application_default()
+api = discovery.build('ml', 'v1', credentials=credentials, cache_discovery=False)
+
+request_data =  {'instances':
+  [
+    {"features": [47.0, 14.5, 1.0, 0.0, 0.0, 0.0, 1.0], "key": 0},
+    {"features": [38.0, 227.525, 1.0, 0.0, 1.0, 0.0, 0.0], "key": 1},
+  ]
+}
+
+parent = 'projects/%s/models/%s/versions/%s' % (PROJECT, 'yourmodel', 'v1')
+response = api.projects().predict(body=request_data, name=parent).execute()
+print(json.dumps(response, sort_keys = True, indent = 4))
+```
+
+The output contains the predicion and key values as below:
+
+```
+{
+    "predictions": [
+        {
+            "key": 0,
+            "prediction": [
+                0.30424559116363525
+            ]
+        },
+        {
+            "key": 1,
+            "prediction": [
+                0.9568923115730286
+            ]
+        }
+    ]
+}
+```
+
+Note that the output format is different from the previous method of using the functional API.
+
+The [Notebook](batch_prediction_with_Keras2.ipynb) explains the whole procedure to use this method for the batch prediction. Follow [Use JupyterLab Notebooks](README.md#use-jupyterlab-notebooks) to run the notebook.
 
 ## Use JupyterLab Notebooks
 
@@ -136,3 +205,5 @@ git clone https://github.com/enakai00/CAIP-examples
 
 - `CAIP-examples/batch_prediction/batch_prediction_with_Keras.ipynb`: Using the functional API.
 - `CAIP-examples/batch_prediction/batch_prediction_with_Keras2.ipynb`: Using the `@tf.function` decorator.
+
+In these notebooks, you define a model to predict the probability of survival using the Titanic Passenger Data.
