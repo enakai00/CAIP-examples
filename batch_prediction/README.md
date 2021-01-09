@@ -50,7 +50,7 @@ Output file:
 {"key": 9, "prediction": [0.4729471206665039]}
 ```
 
-In this example, integer keys are used as a unique identifier, and both input and output are sorted by the key. You can match the input and output using the key value even if the output is randomly ordered.
+In this example, integer keys are used as a unique identifier and both input and output are sorted by the key. However, you can match the input and output using the key value even if the output is randomly ordered.
 
 ## Modify Keras models
 
