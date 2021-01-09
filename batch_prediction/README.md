@@ -139,7 +139,7 @@ export_path = './export'
 model.save(export_path, signatures={'serving_default': add_key}, save_format='tf')
 ```
 
-This ensure that the function `add_key` is used to make predictions once you deploy it to the AI Platform. The following code snippet shows how you use the deployed model to make an online prediction. The model accepts the `key` field in addition to `features`.
+This ensures that the function `add_key` is used to make predictions once you deploy it to the AI Platform. The following code snippet shows how you use the deployed model to make an online prediction. The model accepts the `key` field in addition to `features`.
 
 ```
 from googleapiclient import discovery
