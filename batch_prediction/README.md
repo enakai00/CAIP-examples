@@ -4,7 +4,7 @@
 
 [Cloud AI Platform](https://cloud.google.com/ai-platform) (CAIP) provides a serverless platform for training and serving machine learning (ML) models. You can use [the batch prediction](https://cloud.google.com/ai-platform/prediction/docs/batch-predict) when you have a large number of instances to get predictions. You store prediction input files in the storage bucket and submit a batch prediction job. The prediction results are recorded in text files and stored in the storage bucket.
 
-When using the batch prediction, you need to consider the fact that the order of prediction results in the output files can be different from the instances in the prediction input files. It is because the batch prediction is conducted with multiple workers in a distributed manner. Hence you need to modify your ML model so that it accepts a unique identifier as a part of the input features, and outputs the same identifier as a part of the prediction result. Conceptually, this can be illustrated as in the following diagram:
+When using the batch prediction, you need to consider the fact that the order of prediction results in the output files can be different from the order of instances in the prediction input files. It is because the batch prediction is conducted with multiple workers in a distributed manner. Hence you need to modify your ML model so that it accepts a unique identifier as a part of the input features, and outputs the same identifier as a part of the prediction result. Conceptually, this can be illustrated as in the following diagram:
 
 ```
                 ML Model
