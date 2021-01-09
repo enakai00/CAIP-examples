@@ -114,7 +114,7 @@ The output contains the predicion and key values as below:
 }
 ```
 
-The [Notebook](batch_prediction_with_Keras.ipynb) explains the whole procedure to use this method for the batch prediction. 
+The [Notebook](batch_prediction_with_Keras.ipynb) explains the whole procedure to use this method for the batch prediction. Follow [Use JupyterLab Notebooks](README.md#use-jupyterlab-notebooks) to run the notebook.
 
 
 ## Use JupyterLab Notebooks
