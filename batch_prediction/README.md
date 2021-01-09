@@ -54,4 +54,85 @@ In this example, integer keys are used as a unique identifier and both input and
 
 ## Modify Keras models
 
+There are multiple ways to add a unique key to the model. If you use Keras to define a model, you can use one of the following methods.
 
+1. Use the functional API to create a wrapper model that adds a key field to an existing model.
+2. Use `@tf.function` decorator to define a wrapper function to make predictions with keys.
+
+### Using the functional API
+
+Suppose that you defined and trained a Keras model. The model object is stored in the variable `model`. You can define and compile a wrapper model `wrapper_model` as below:
+
+```
+key = layers.Input(shape=(), name='key', dtype='int32')
+pred = layers.Concatenate(name='prediction_with_key')(
+    [model.output, tf.cast(layers.Reshape((1,))(key), tf.float32)])
+wrapper_model = models.Model(inputs=[model.input, key], outputs=pred)
+wrapper_model.compile()
+```
+
+You export `wrapper_model` in the saved_model format and deploy it to the AI Platform. The following code snippet shows how you use the deployed model to make an online prediction. The model accepts the `key` field in addition to `features`.
+
+```
+from googleapiclient import discovery
+from oauth2client.client import GoogleCredentials
+import json
+
+credentials = GoogleCredentials.get_application_default()
+api = discovery.build('ml', 'v1', credentials=credentials, cache_discovery=False)
+
+request_data =  {'instances':
+  [
+    {"features": [47.0, 14.5, 1.0, 0.0, 0.0, 0.0, 1.0], "key": 0},
+    {"features": [38.0, 227.525, 1.0, 0.0, 1.0, 0.0, 0.0], "key": 1},
+  ]
+}
+
+parent = 'projects/%s/models/%s/versions/%s' % (PROJECT, 'yourmodel', 'v1')
+response = api.projects().predict(body=request_data, name=parent).execute()
+print(json.dumps(response, sort_keys = True, indent = 4))
+```
+
+The output contains the predicion and key values as below:
+
+```
+{
+    "predictions": [
+        {
+            "prediction_with_key": [
+                0.10660852491855621,
+                0.0
+            ]
+        },
+        {
+            "prediction_with_key": [
+                0.7562407851219177,
+                1.0
+            ]
+        }
+    ]
+}
+```
+
+The [Notebook](batch_prediction_with_Keras.ipynb) explains the whole procedure to use this method for the batch prediction. 
+
+
+## Use JupyterLab Notebooks
+
+1. Create a new GCP project and enable the following API. 
+- AI Platform Training & Prediction API
+- Notebooks API
+- Dataflow API
+
+2. Launch a new notebook instance from the "AI Platform -> Notebooks" menu. Choose "TensorFlow Enterprise 2.3 without GPUs" for the instance type.
+
+3. Open JupyterLab and execute the following commond from the JupyterLab terminal.
+
+```
+git clone https://github.com/enakai00/CAIP-examples
+```
+
+4. Open the following notebooks and follow the instruction.
+
+- `CAIP-examples/batch_prediction/batch_prediction_with_Keras.ipynb`: Using the functional API.
+- `CAIP-examples/batch_prediction/batch_prediction_with_Keras2.ipynb`: Using the `@tf.function` decorator.
