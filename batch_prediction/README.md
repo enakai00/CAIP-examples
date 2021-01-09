@@ -132,7 +132,7 @@ The `input_signature` option specifies the parameter types of the function `add_
 
 >Note: `@tf.function` decorator builds a tensorfolow graph containing the specified function.
 
-You export the model in the saved_model format using the wrapper function as 'serving_default' as below:
+You export the model in the saved_model format using the wrapper function as `serving_default` as below:
 
 ```
 export_path = './export'
